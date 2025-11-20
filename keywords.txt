@@ -1,0 +1,48 @@
+#######################################
+# Syntax Coloring Map For TCA9554
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+TCA9554_t	KEYWORD1
+TCA9554_Reg_t	KEYWORD1
+TCA9554_Pin_t	KEYWORD1
+TCA9554_PinMode_t	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+TCA9554_create	KEYWORD2
+TCA9554_destroy	KEYWORD2
+TCA9554_set_pin_mode	KEYWORD2
+TCA9554_set_port_mode	KEYWORD2
+TCA9554_digital_write	KEYWORD2
+TCA9554_digital_read	KEYWORD2
+TCA9554_write_port	KEYWORD2
+TCA9554_read_port	KEYWORD2
+TCA9554_set_polarity	KEYWORD2
+TCA9554_set_port_polarity	KEYWORD2
+TCA9554_read_register	KEYWORD2
+TCA9554_write_register	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+TCA9554_REG_INPUT	LITERAL1
+TCA9554_REG_OUTPUT	LITERAL1
+TCA9554_REG_POLARITY	LITERAL1
+TCA9554_REG_CONFIG	LITERAL1
+TCA9554_PIN0	LITERAL1
+TCA9554_PIN1	LITERAL1
+TCA9554_PIN2	LITERAL1
+TCA9554_PIN3	LITERAL1
+TCA9554_PIN4	LITERAL1
+TCA9554_PIN5	LITERAL1
+TCA9554_PIN6	LITERAL1
+TCA9554_PIN7	LITERAL1
+TCA9554_MODE_OUTPUT	LITERAL1
+TCA9554_MODE_INPUT	LITERAL1
