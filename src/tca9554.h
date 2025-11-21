@@ -140,6 +140,18 @@ esp_err_t TCA9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value
 esp_err_t TCA9554_write_port(TCA9554_t* dev, uint8_t value);
 
 /**
+ * @brief Writes values to all pins specified in a mask at once.
+ * 
+ * Only affects pins configured as outputs.
+ * 
+ * @param dev Pointer to TCA9554 device instance
+ * @param value 8-bit value to write (bit 0 = pin 0, bit 7 = pin 7)
+ * @param mask 8-bit value with bits which should be written to (bit 0 = pin 0, bit 7 = pin 7)
+ * @return esp_err_t ESP_OK on success, error code otherwise
+ */
+esp_err_t TCA9554_write_port_masked(TCA9554_t* dev, uint8_t value, uint8_t mask);
+
+/**
  * @brief Reads the values from all 8 pins at once.
  * 
  * Reads the actual logic levels on all pins.

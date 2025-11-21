@@ -13,6 +13,7 @@ static const char *TAG = "TCA9554";
 struct TCA9554_t {
     i2c_port_t i2c_port;
     uint8_t dev_addr;
+    uint8_t value;
 };
 
 /* =========================
@@ -87,6 +88,7 @@ TCA9554_t* TCA9554_create(i2c_port_t i2c_port, uint8_t dev_addr) {
     
     dev->i2c_port = i2c_port;
     dev->dev_addr = dev_addr;
+    dev->value = 0x00;
     
     // Verify device is accessible by reading the input register
     uint8_t test_val;
@@ -135,20 +137,15 @@ esp_err_t TCA9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value
     if (!dev) return ESP_ERR_INVALID_ARG;
     if (pin > TCA9554_PIN7) return ESP_ERR_INVALID_ARG;
     
-    // Read current output register
-    uint8_t output;
-    esp_err_t ret = tca9554_read_reg(dev, TCA9554_REG_OUTPUT, &output);
-    if (ret != ESP_OK) return ret;
-    
     // Modify the specific pin bit
     if (value) {
-        output |= (1 << pin);   // Set bit to 1 for HIGH
+        dev->value |= (1 << pin);   // Set bit to 1 for HIGH
     } else {
-        output &= ~(1 << pin);  // Clear bit to 0 for LOW
+        dev->value &= ~(1 << pin);  // Clear bit to 0 for LOW
     }
     
     // Write back the modified output
-    return tca9554_write_reg(dev, TCA9554_REG_OUTPUT, output);
+    return tca9554_write_reg(dev, TCA9554_REG_OUTPUT, dev->value);
 }
 
 esp_err_t TCA9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value) {
@@ -168,12 +165,23 @@ esp_err_t TCA9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value
 
 esp_err_t TCA9554_write_port(TCA9554_t* dev, uint8_t value) {
     if (!dev) return ESP_ERR_INVALID_ARG;
+    dev->value = value;
     return tca9554_write_reg(dev, TCA9554_REG_OUTPUT, value);
 }
 
+esp_err_t TCA9554_write_port_masked(TCA9554_t* dev, uint8_t value, uint8_t mask) {
+    if (!dev) return ESP_ERR_INVALID_ARG;
+    dev->value = (value & mask) | (dev->value & ~mask);
+    return tca9554_write_reg(dev, TCA9554_REG_OUTPUT, dev->value);
+}
+
+
 esp_err_t TCA9554_read_port(TCA9554_t* dev, uint8_t* value) {
     if (!dev || !value) return ESP_ERR_INVALID_ARG;
-    return tca9554_read_reg(dev, TCA9554_REG_INPUT, value);
+    esp_err_t ret = tca9554_read_reg(dev, TCA9554_REG_INPUT, value);
+    if (ret != ESP_OK) return ret;
+    dev->value = *value;
+    return ESP_OK;
 }
 
 esp_err_t TCA9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t inverted) {
