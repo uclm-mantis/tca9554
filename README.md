@@ -125,18 +125,18 @@ void app_main(void) {
     i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0);
 
     // Create TCA9554 device (address 0x20)
-    TCA9554_t* gpio_expander = TCA9554_create(I2C_NUM_0, 0x20);
+    TCA9554_t* gpio_expander = tca9554_create(I2C_NUM_0, 0x20);
 
     // Configure pin 0 as output, pin 1 as input
-    TCA9554_set_pin_mode(gpio_expander, TCA9554_PIN0, TCA9554_MODE_OUTPUT);
-    TCA9554_set_pin_mode(gpio_expander, TCA9554_PIN1, TCA9554_MODE_INPUT);
+    tca9554_set_pin_mode(gpio_expander, TCA9554_PIN0, TCA9554_MODE_OUTPUT);
+    tca9554_set_pin_mode(gpio_expander, TCA9554_PIN1, TCA9554_MODE_INPUT);
 
     // Write to output pin
-    TCA9554_digital_write(gpio_expander, TCA9554_PIN0, 1);
+    tca9554_digital_write(gpio_expander, TCA9554_PIN0, 1);
 
     // Read from input pin
     uint8_t value;
-    TCA9554_digital_read(gpio_expander, TCA9554_PIN1, &value);
+    tca9554_digital_read(gpio_expander, TCA9554_PIN1, &value);
     printf("Pin 1 value: %d\\n", value);
 }
 ```
@@ -156,22 +156,22 @@ void setup() {
     Wire.begin(21, 22);  // SDA, SCL
     
     // Create TCA9554 device (address 0x20)
-    gpio_expander = TCA9554_create(I2C_NUM_0, 0x20);
+    gpio_expander = tca9554_create(I2C_NUM_0, 0x20);
     
     // Configure pin 0 as output, pin 1 as input
-    TCA9554_set_pin_mode(gpio_expander, TCA9554_PIN0, TCA9554_MODE_OUTPUT);
-    TCA9554_set_pin_mode(gpio_expander, TCA9554_PIN1, TCA9554_MODE_INPUT);
+    tca9554_set_pin_mode(gpio_expander, TCA9554_PIN0, TCA9554_MODE_OUTPUT);
+    tca9554_set_pin_mode(gpio_expander, TCA9554_PIN1, TCA9554_MODE_INPUT);
 }
 
 void loop() {
     // Toggle output pin
     static uint8_t state = 0;
-    TCA9554_digital_write(gpio_expander, TCA9554_PIN0, state);
+    tca9554_digital_write(gpio_expander, TCA9554_PIN0, state);
     state = !state;
     
     // Read input pin
     uint8_t value;
-    TCA9554_digital_read(gpio_expander, TCA9554_PIN1, &value);
+    tca9554_digital_read(gpio_expander, TCA9554_PIN1, &value);
     Serial.print("Pin 1: ");
     Serial.println(value);
     
@@ -183,11 +183,11 @@ void loop() {
 
 ### Device Management
 
-#### `TCA9554_create()`
+#### `tca9554_create()`
 Creates and initializes a TCA9554 device instance.
 
 ```c
-TCA9554_t* TCA9554_create(i2c_port_t i2c_port, uint8_t dev_addr);
+TCA9554_t* tca9554_create(i2c_port_t i2c_port, uint8_t dev_addr);
 ```
 
 **Parameters:**
@@ -198,22 +198,22 @@ TCA9554_t* TCA9554_create(i2c_port_t i2c_port, uint8_t dev_addr);
 
 ---
 
-#### `TCA9554_destroy()`
+#### `tca9554_destroy()`
 Destroys a TCA9554 device instance and frees resources.
 
 ```c
-void TCA9554_destroy(TCA9554_t* dev);
+void tca9554_destroy(TCA9554_t* dev);
 ```
 
 ---
 
 ### Pin Configuration
 
-#### `TCA9554_set_pin_mode()`
+#### `tca9554_set_pin_mode()`
 Sets the mode (input/output) for a single pin.
 
 ```c
-esp_err_t TCA9554_set_pin_mode(TCA9554_t* dev, TCA9554_Pin_t pin, TCA9554_PinMode_t mode);
+esp_err_t tca9554_set_pin_mode(TCA9554_t* dev, TCA9554_Pin_t pin, TCA9554_PinMode_t mode);
 ```
 
 **Parameters:**
@@ -222,11 +222,11 @@ esp_err_t TCA9554_set_pin_mode(TCA9554_t* dev, TCA9554_Pin_t pin, TCA9554_PinMod
 
 ---
 
-#### `TCA9554_set_port_mode()`
+#### `tca9554_set_port_mode()`
 Sets the mode for all 8 pins at once.
 
 ```c
-esp_err_t TCA9554_set_port_mode(TCA9554_t* dev, uint8_t mode_mask);
+esp_err_t tca9554_set_port_mode(TCA9554_t* dev, uint8_t mode_mask);
 ```
 
 **Parameters:**
@@ -236,11 +236,11 @@ esp_err_t TCA9554_set_port_mode(TCA9554_t* dev, uint8_t mode_mask);
 
 ### Digital I/O
 
-#### `TCA9554_digital_write()`
+#### `tca9554_digital_write()`
 Writes a digital value to a single output pin.
 
 ```c
-esp_err_t TCA9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value);
+esp_err_t tca9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value);
 ```
 
 **Parameters:**
@@ -249,11 +249,11 @@ esp_err_t TCA9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value
 
 ---
 
-#### `TCA9554_digital_read()`
+#### `tca9554_digital_read()`
 Reads the digital value from a single pin.
 
 ```c
-esp_err_t TCA9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value);
+esp_err_t tca9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value);
 ```
 
 **Parameters:**
@@ -262,11 +262,11 @@ esp_err_t TCA9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value
 
 ---
 
-#### `TCA9554_write_port()`
+#### `tca9554_write_port()`
 Writes values to all 8 pins at once.
 
 ```c
-esp_err_t TCA9554_write_port(TCA9554_t* dev, uint8_t value);
+esp_err_t tca9554_write_port(TCA9554_t* dev, uint8_t value);
 ```
 
 **Parameters:**
@@ -274,11 +274,11 @@ esp_err_t TCA9554_write_port(TCA9554_t* dev, uint8_t value);
 
 ---
 
-#### `TCA9554_read_port()`
+#### `tca9554_read_port()`
 Reads values from all 8 pins at once.
 
 ```c
-esp_err_t TCA9554_read_port(TCA9554_t* dev, uint8_t* value);
+esp_err_t tca9554_read_port(TCA9554_t* dev, uint8_t* value);
 ```
 
 **Parameters:**
@@ -288,11 +288,11 @@ esp_err_t TCA9554_read_port(TCA9554_t* dev, uint8_t* value);
 
 ### Polarity Inversion
 
-#### `TCA9554_set_polarity()`
+#### `tca9554_set_polarity()`
 Sets the polarity inversion for a single pin.
 
 ```c
-esp_err_t TCA9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t inverted);
+esp_err_t tca9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t inverted);
 ```
 
 **Parameters:**
@@ -303,11 +303,11 @@ esp_err_t TCA9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t invert
 
 ---
 
-#### `TCA9554_set_port_polarity()`
+#### `tca9554_set_port_polarity()`
 Sets the polarity inversion for all 8 pins at once.
 
 ```c
-esp_err_t TCA9554_set_port_polarity(TCA9554_t* dev, uint8_t polarity_mask);
+esp_err_t tca9554_set_port_polarity(TCA9554_t* dev, uint8_t polarity_mask);
 ```
 
 **Parameters:**
@@ -317,20 +317,20 @@ esp_err_t TCA9554_set_port_polarity(TCA9554_t* dev, uint8_t polarity_mask);
 
 ### Register Access
 
-#### `TCA9554_read_register()`
+#### `tca9554_read_register()`
 Reads a single register from the TCA9554.
 
 ```c
-esp_err_t TCA9554_read_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t* value);
+esp_err_t tca9554_read_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t* value);
 ```
 
 ---
 
-#### `TCA9554_write_register()`
+#### `tca9554_write_register()`
 Writes a single register to the TCA9554.
 
 ```c
-esp_err_t TCA9554_write_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t value);
+esp_err_t tca9554_write_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t value);
 ```
 
 ---
@@ -341,42 +341,42 @@ esp_err_t TCA9554_write_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t valu
 
 ```c
 // Device 1 at address 0x20 (A0=A1=A2=GND)
-TCA9554_t* expander1 = TCA9554_create(I2C_NUM_0, 0x20);
+TCA9554_t* expander1 = tca9554_create(I2C_NUM_0, 0x20);
 
 // Device 2 at address 0x21 (A0=VCC, A1=A2=GND)
-TCA9554_t* expander2 = TCA9554_create(I2C_NUM_0, 0x21);
+TCA9554_t* expander2 = tca9554_create(I2C_NUM_0, 0x21);
 
 // Configure and use independently
-TCA9554_set_pin_mode(expander1, TCA9554_PIN0, TCA9554_MODE_OUTPUT);
-TCA9554_set_pin_mode(expander2, TCA9554_PIN0, TCA9554_MODE_OUTPUT);
+tca9554_set_pin_mode(expander1, TCA9554_PIN0, TCA9554_MODE_OUTPUT);
+tca9554_set_pin_mode(expander2, TCA9554_PIN0, TCA9554_MODE_OUTPUT);
 ```
 
 ### Port-Level Operations
 
 ```c
 // Configure all pins at once: pins 0-3 as outputs, pins 4-7 as inputs
-TCA9554_set_port_mode(expander, 0b11110000);
+tca9554_set_port_mode(expander, 0b11110000);
 
 // Write to all output pins at once
-TCA9554_write_port(expander, 0b00001111);
+tca9554_write_port(expander, 0b00001111);
 
 // Read all input pins at once
 uint8_t port_value;
-TCA9554_read_port(expander, &port_value);
+tca9554_read_port(expander, &port_value);
 ```
 
 ### Polarity Inversion Example
 
 ```c
 // Configure pin 0 as input
-TCA9554_set_pin_mode(expander, TCA9554_PIN0, TCA9554_MODE_INPUT);
+tca9554_set_pin_mode(expander, TCA9554_PIN0, TCA9554_MODE_INPUT);
 
 // Enable polarity inversion (useful for active-low signals)
-TCA9554_set_polarity(expander, TCA9554_PIN0, 1);
+tca9554_set_polarity(expander, TCA9554_PIN0, 1);
 
 // Now when pin is physically LOW, you'll read HIGH
 uint8_t value;
-TCA9554_digital_read(expander, TCA9554_PIN0, &value);
+tca9554_digital_read(expander, TCA9554_PIN0, &value);
 ```
 
 ## Troubleshooting

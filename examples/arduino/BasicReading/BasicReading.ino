@@ -60,7 +60,7 @@ void setup() {
     i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0);
     
     // Create TCA9554 device instance
-    gpio_expander = TCA9554_create(I2C_NUM_0, TCA9554_ADDR);
+    gpio_expander = tca9554_create(I2C_NUM_0, TCA9554_ADDR);
     if (!gpio_expander) {
         Serial.println("ERROR: Failed to create TCA9554 device");
         Serial.println("Check I2C connections and address!");
@@ -69,10 +69,10 @@ void setup() {
     Serial.printf("TCA9554 device created at address 0x%02X\n", TCA9554_ADDR);
     
     // Configure pins
-    TCA9554_set_pin_mode(gpio_expander, LED_PIN, TCA9554_MODE_OUTPUT);
-    TCA9554_set_pin_mode(gpio_expander, BUTTON_PIN, TCA9554_MODE_INPUT);
-    TCA9554_set_pin_mode(gpio_expander, OUTPUT_PIN, TCA9554_MODE_OUTPUT);
-    TCA9554_set_pin_mode(gpio_expander, INPUT_PIN, TCA9554_MODE_INPUT);
+    tca9554_set_pin_mode(gpio_expander, LED_PIN, TCA9554_MODE_OUTPUT);
+    tca9554_set_pin_mode(gpio_expander, BUTTON_PIN, TCA9554_MODE_INPUT);
+    tca9554_set_pin_mode(gpio_expander, OUTPUT_PIN, TCA9554_MODE_OUTPUT);
+    tca9554_set_pin_mode(gpio_expander, INPUT_PIN, TCA9554_MODE_INPUT);
     Serial.println("Pins configured:");
     Serial.printf("  Pin %d: OUTPUT (LED)\n", LED_PIN);
     Serial.printf("  Pin %d: INPUT (Button)\n", BUTTON_PIN);
@@ -80,13 +80,13 @@ void setup() {
     Serial.printf("  Pin %d: INPUT\n", INPUT_PIN);
     
     // Set initial output states
-    TCA9554_digital_write(gpio_expander, LED_PIN, 0);
-    TCA9554_digital_write(gpio_expander, OUTPUT_PIN, 0);
+    tca9554_digital_write(gpio_expander, LED_PIN, 0);
+    tca9554_digital_write(gpio_expander, OUTPUT_PIN, 0);
     Serial.println("Initial outputs set to LOW");
     
     // Optional: Enable polarity inversion on button pin
     // This makes the button read as HIGH when pressed (if button pulls to GND)
-    // TCA9554_set_polarity(gpio_expander, BUTTON_PIN, 1);
+    // tca9554_set_polarity(gpio_expander, BUTTON_PIN, 1);
     
     Serial.println("===========================");
     Serial.println("Setup complete!");
@@ -101,12 +101,12 @@ void loop() {
     
     // Toggle LED
     led_state = !led_state;
-    TCA9554_digital_write(gpio_expander, LED_PIN, led_state);
+    tca9554_digital_write(gpio_expander, LED_PIN, led_state);
     Serial.printf("LED: %s\n", led_state ? "ON" : "OFF");
     
     // Read button state
     uint8_t button_state;
-    if (TCA9554_digital_read(gpio_expander, BUTTON_PIN, &button_state) == ESP_OK) {
+    if (tca9554_digital_read(gpio_expander, BUTTON_PIN, &button_state) == ESP_OK) {
         if (button_state != last_button_state) {
             Serial.printf("Button: %s\n", button_state ? "PRESSED" : "RELEASED");
             last_button_state = button_state;
@@ -115,7 +115,7 @@ void loop() {
     
     // Read all pins at once (port-level read)
     uint8_t port_value;
-    if (TCA9554_read_port(gpio_expander, &port_value) == ESP_OK) {
+    if (tca9554_read_port(gpio_expander, &port_value) == ESP_OK) {
         Serial.printf("Port value: 0x%02X (binary: ", port_value);
         for (int i = 7; i >= 0; i--) {
             Serial.print((port_value >> i) & 1);

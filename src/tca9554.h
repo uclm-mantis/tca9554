@@ -75,14 +75,14 @@ typedef struct TCA9554_t TCA9554_t;
  * @param dev_addr I2C device address (0x20-0x27, based on A0, A1, A2 pins)
  * @return TCA9554_t* Pointer to device instance, or NULL on failure
  */
-TCA9554_t* TCA9554_create(i2c_port_t i2c_port, uint8_t dev_addr);
+TCA9554_t* tca9554_create(i2c_port_t i2c_port, uint8_t dev_addr);
 
 /**
  * @brief Destroys a TCA9554 device instance and frees resources.
  * 
  * @param dev Pointer to device instance
  */
-void TCA9554_destroy(TCA9554_t* dev);
+void tca9554_destroy(TCA9554_t* dev);
 
 /**
  * @brief Sets the mode (input/output) for a single pin.
@@ -92,7 +92,7 @@ void TCA9554_destroy(TCA9554_t* dev);
  * @param mode Pin mode (TCA9554_MODE_INPUT or TCA9554_MODE_OUTPUT)
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_set_pin_mode(TCA9554_t* dev, TCA9554_Pin_t pin, TCA9554_PinMode_t mode);
+esp_err_t tca9554_set_pin_mode(TCA9554_t* dev, TCA9554_Pin_t pin, TCA9554_PinMode_t mode);
 
 /**
  * @brief Sets the mode (input/output) for all 8 pins at once.
@@ -101,7 +101,7 @@ esp_err_t TCA9554_set_pin_mode(TCA9554_t* dev, TCA9554_Pin_t pin, TCA9554_PinMod
  * @param mode_mask 8-bit mask where 1=input, 0=output (bit 0 = pin 0, bit 7 = pin 7)
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_set_port_mode(TCA9554_t* dev, uint8_t mode_mask);
+esp_err_t tca9554_set_port_mode(TCA9554_t* dev, uint8_t mode_mask);
 
 /**
  * @brief Writes a digital value to a single output pin.
@@ -113,7 +113,7 @@ esp_err_t TCA9554_set_port_mode(TCA9554_t* dev, uint8_t mode_mask);
  * @param value Output value (0 = LOW, non-zero = HIGH)
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value);
+esp_err_t tca9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value);
 
 /**
  * @brief Reads the digital value from a single input pin.
@@ -126,7 +126,7 @@ esp_err_t TCA9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value
  * @param[out] value Pointer to store the read value (0 or 1)
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value);
+esp_err_t tca9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value);
 
 /**
  * @brief Writes values to all 8 output pins at once.
@@ -137,7 +137,7 @@ esp_err_t TCA9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value
  * @param value 8-bit value to write (bit 0 = pin 0, bit 7 = pin 7)
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_write_port(TCA9554_t* dev, uint8_t value);
+esp_err_t tca9554_write_port(TCA9554_t* dev, uint8_t value);
 
 /**
  * @brief Writes values to all pins specified in a mask at once.
@@ -149,7 +149,7 @@ esp_err_t TCA9554_write_port(TCA9554_t* dev, uint8_t value);
  * @param mask 8-bit value with bits which should be written to (bit 0 = pin 0, bit 7 = pin 7)
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_write_port_masked(TCA9554_t* dev, uint8_t value, uint8_t mask);
+esp_err_t tca9554_write_port_masked(TCA9554_t* dev, uint8_t value, uint8_t mask);
 
 /**
  * @brief Reads the values from all 8 pins at once.
@@ -160,7 +160,7 @@ esp_err_t TCA9554_write_port_masked(TCA9554_t* dev, uint8_t value, uint8_t mask)
  * @param[out] value Pointer to store the 8-bit read value (bit 0 = pin 0, bit 7 = pin 7)
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_read_port(TCA9554_t* dev, uint8_t* value);
+esp_err_t tca9554_read_port(TCA9554_t* dev, uint8_t* value);
 
 /**
  * @brief Sets the polarity inversion for a single pin.
@@ -173,7 +173,7 @@ esp_err_t TCA9554_read_port(TCA9554_t* dev, uint8_t* value);
  * @param inverted 0 = normal polarity, 1 = inverted polarity
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t inverted);
+esp_err_t tca9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t inverted);
 
 /**
  * @brief Sets the polarity inversion for all 8 pins at once.
@@ -182,7 +182,7 @@ esp_err_t TCA9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t invert
  * @param polarity_mask 8-bit mask where 1=inverted, 0=normal (bit 0 = pin 0, bit 7 = pin 7)
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_set_port_polarity(TCA9554_t* dev, uint8_t polarity_mask);
+esp_err_t tca9554_set_port_polarity(TCA9554_t* dev, uint8_t polarity_mask);
 
 /**
  * @brief Reads a single register from the TCA9554.
@@ -192,7 +192,7 @@ esp_err_t TCA9554_set_port_polarity(TCA9554_t* dev, uint8_t polarity_mask);
  * @param[out] value Pointer to store the read value
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_read_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t* value);
+esp_err_t tca9554_read_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t* value);
 
 /**
  * @brief Writes a single register to the TCA9554.
@@ -202,7 +202,7 @@ esp_err_t TCA9554_read_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t* valu
  * @param value Value to write
  * @return esp_err_t ESP_OK on success, error code otherwise
  */
-esp_err_t TCA9554_write_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t value);
+esp_err_t tca9554_write_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t value);
 
 #ifdef __cplusplus
 } /* extern "C" */

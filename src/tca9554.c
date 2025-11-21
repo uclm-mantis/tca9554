@@ -74,7 +74,7 @@ static esp_err_t tca9554_write_reg(TCA9554_t* dev, uint8_t reg, uint8_t value) {
  * =========================
  */
 
-TCA9554_t* TCA9554_create(i2c_port_t i2c_port, uint8_t dev_addr) {
+TCA9554_t* tca9554_create(i2c_port_t i2c_port, uint8_t dev_addr) {
     if (dev_addr < 0x20 || dev_addr > 0x27) {
         ESP_LOGE(TAG, "Invalid device address 0x%02X (must be 0x20-0x27)", dev_addr);
         return NULL;
@@ -103,12 +103,12 @@ TCA9554_t* TCA9554_create(i2c_port_t i2c_port, uint8_t dev_addr) {
     return dev;
 }
 
-void TCA9554_destroy(TCA9554_t* dev) {
+void tca9554_destroy(TCA9554_t* dev) {
     if (!dev) return;
     free(dev);
 }
 
-esp_err_t TCA9554_set_pin_mode(TCA9554_t* dev, TCA9554_Pin_t pin, TCA9554_PinMode_t mode) {
+esp_err_t tca9554_set_pin_mode(TCA9554_t* dev, TCA9554_Pin_t pin, TCA9554_PinMode_t mode) {
     if (!dev) return ESP_ERR_INVALID_ARG;
     if (pin > TCA9554_PIN7) return ESP_ERR_INVALID_ARG;
     
@@ -128,12 +128,12 @@ esp_err_t TCA9554_set_pin_mode(TCA9554_t* dev, TCA9554_Pin_t pin, TCA9554_PinMod
     return tca9554_write_reg(dev, TCA9554_REG_CONFIG, config);
 }
 
-esp_err_t TCA9554_set_port_mode(TCA9554_t* dev, uint8_t mode_mask) {
+esp_err_t tca9554_set_port_mode(TCA9554_t* dev, uint8_t mode_mask) {
     if (!dev) return ESP_ERR_INVALID_ARG;
     return tca9554_write_reg(dev, TCA9554_REG_CONFIG, mode_mask);
 }
 
-esp_err_t TCA9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value) {
+esp_err_t tca9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value) {
     if (!dev) return ESP_ERR_INVALID_ARG;
     if (pin > TCA9554_PIN7) return ESP_ERR_INVALID_ARG;
     
@@ -148,7 +148,7 @@ esp_err_t TCA9554_digital_write(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t value
     return tca9554_write_reg(dev, TCA9554_REG_OUTPUT, dev->value);
 }
 
-esp_err_t TCA9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value) {
+esp_err_t tca9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value) {
     if (!dev || !value) return ESP_ERR_INVALID_ARG;
     if (pin > TCA9554_PIN7) return ESP_ERR_INVALID_ARG;
     
@@ -163,20 +163,21 @@ esp_err_t TCA9554_digital_read(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t* value
     return ESP_OK;
 }
 
-esp_err_t TCA9554_write_port(TCA9554_t* dev, uint8_t value) {
+
+esp_err_t tca9554_write_port(TCA9554_t* dev, uint8_t value) {
     if (!dev) return ESP_ERR_INVALID_ARG;
     dev->value = value;
     return tca9554_write_reg(dev, TCA9554_REG_OUTPUT, value);
 }
 
-esp_err_t TCA9554_write_port_masked(TCA9554_t* dev, uint8_t value, uint8_t mask) {
+esp_err_t tca9554_write_port_masked(TCA9554_t* dev, uint8_t value, uint8_t mask) {
     if (!dev) return ESP_ERR_INVALID_ARG;
     dev->value = (value & mask) | (dev->value & ~mask);
     return tca9554_write_reg(dev, TCA9554_REG_OUTPUT, dev->value);
 }
 
 
-esp_err_t TCA9554_read_port(TCA9554_t* dev, uint8_t* value) {
+esp_err_t tca9554_read_port(TCA9554_t* dev, uint8_t* value) {
     if (!dev || !value) return ESP_ERR_INVALID_ARG;
     esp_err_t ret = tca9554_read_reg(dev, TCA9554_REG_INPUT, value);
     if (ret != ESP_OK) return ret;
@@ -184,7 +185,7 @@ esp_err_t TCA9554_read_port(TCA9554_t* dev, uint8_t* value) {
     return ESP_OK;
 }
 
-esp_err_t TCA9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t inverted) {
+esp_err_t tca9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t inverted) {
     if (!dev) return ESP_ERR_INVALID_ARG;
     if (pin > TCA9554_PIN7) return ESP_ERR_INVALID_ARG;
     
@@ -204,18 +205,18 @@ esp_err_t TCA9554_set_polarity(TCA9554_t* dev, TCA9554_Pin_t pin, uint8_t invert
     return tca9554_write_reg(dev, TCA9554_REG_POLARITY, polarity);
 }
 
-esp_err_t TCA9554_set_port_polarity(TCA9554_t* dev, uint8_t polarity_mask) {
+esp_err_t tca9554_set_port_polarity(TCA9554_t* dev, uint8_t polarity_mask) {
     if (!dev) return ESP_ERR_INVALID_ARG;
     return tca9554_write_reg(dev, TCA9554_REG_POLARITY, polarity_mask);
 }
 
-esp_err_t TCA9554_read_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t* value) {
+esp_err_t tca9554_read_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t* value) {
     if (!dev || !value) return ESP_ERR_INVALID_ARG;
     if (reg > TCA9554_REG_CONFIG) return ESP_ERR_INVALID_ARG;
     return tca9554_read_reg(dev, reg, value);
 }
 
-esp_err_t TCA9554_write_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t value) {
+esp_err_t tca9554_write_register(TCA9554_t* dev, TCA9554_Reg_t reg, uint8_t value) {
     if (!dev) return ESP_ERR_INVALID_ARG;
     if (reg > TCA9554_REG_CONFIG) return ESP_ERR_INVALID_ARG;
     return tca9554_write_reg(dev, reg, value);

@@ -40,7 +40,7 @@ void app_main(void) {
     ESP_LOGI(TAG, "I2C bus initialized");
     
     // Create TCA9554 device instance
-    TCA9554_t* gpio_expander = TCA9554_create(I2C_NUM_0, TCA9554_ADDR);
+    TCA9554_t* gpio_expander = tca9554_create(I2C_NUM_0, TCA9554_ADDR);
     if (!gpio_expander) {
         ESP_LOGE(TAG, "Failed to create TCA9554 device");
         ESP_LOGE(TAG, "Check I2C connections and address!");
@@ -49,10 +49,10 @@ void app_main(void) {
     ESP_LOGI(TAG, "TCA9554 device created at address 0x%02X", TCA9554_ADDR);
     
     // Configure pins
-    ESP_ERROR_CHECK(TCA9554_set_pin_mode(gpio_expander, LED_PIN, TCA9554_MODE_OUTPUT));
-    ESP_ERROR_CHECK(TCA9554_set_pin_mode(gpio_expander, BUTTON_PIN, TCA9554_MODE_INPUT));
-    ESP_ERROR_CHECK(TCA9554_set_pin_mode(gpio_expander, OUTPUT_PIN, TCA9554_MODE_OUTPUT));
-    ESP_ERROR_CHECK(TCA9554_set_pin_mode(gpio_expander, INPUT_PIN, TCA9554_MODE_INPUT));
+    ESP_ERROR_CHECK(tca9554_set_pin_mode(gpio_expander, LED_PIN, TCA9554_MODE_OUTPUT));
+    ESP_ERROR_CHECK(tca9554_set_pin_mode(gpio_expander, BUTTON_PIN, TCA9554_MODE_INPUT));
+    ESP_ERROR_CHECK(tca9554_set_pin_mode(gpio_expander, OUTPUT_PIN, TCA9554_MODE_OUTPUT));
+    ESP_ERROR_CHECK(tca9554_set_pin_mode(gpio_expander, INPUT_PIN, TCA9554_MODE_INPUT));
     ESP_LOGI(TAG, "Pins configured:");
     ESP_LOGI(TAG, "  Pin %d: OUTPUT (LED)", LED_PIN);
     ESP_LOGI(TAG, "  Pin %d: INPUT (Button)", BUTTON_PIN);
@@ -60,13 +60,13 @@ void app_main(void) {
     ESP_LOGI(TAG, "  Pin %d: INPUT", INPUT_PIN);
     
     // Set initial output states
-    ESP_ERROR_CHECK(TCA9554_digital_write(gpio_expander, LED_PIN, 0));
-    ESP_ERROR_CHECK(TCA9554_digital_write(gpio_expander, OUTPUT_PIN, 0));
+    ESP_ERROR_CHECK(tca9554_digital_write(gpio_expander, LED_PIN, 0));
+    ESP_ERROR_CHECK(tca9554_digital_write(gpio_expander, OUTPUT_PIN, 0));
     ESP_LOGI(TAG, "Initial outputs set to LOW");
     
     // Optional: Enable polarity inversion on button pin
     // This makes the button read as HIGH when pressed (if button pulls to GND)
-    // TCA9554_set_polarity(gpio_expander, BUTTON_PIN, 1);
+    // tca9554_set_polarity(gpio_expander, BUTTON_PIN, 1);
     
     ESP_LOGI(TAG, "Setup complete!");
     ESP_LOGI(TAG, "LED will blink on pin %d", LED_PIN);
@@ -79,12 +79,12 @@ void app_main(void) {
     while (1) {
         // Toggle LED
         led_state = !led_state;
-        ESP_ERROR_CHECK(TCA9554_digital_write(gpio_expander, LED_PIN, led_state));
+        ESP_ERROR_CHECK(tca9554_digital_write(gpio_expander, LED_PIN, led_state));
         ESP_LOGI(TAG, "LED: %s", led_state ? "ON" : "OFF");
         
         // Read button state
         uint8_t button_state;
-        if (TCA9554_digital_read(gpio_expander, BUTTON_PIN, &button_state) == ESP_OK) {
+        if (tca9554_digital_read(gpio_expander, BUTTON_PIN, &button_state) == ESP_OK) {
             if (button_state != last_button_state) {
                 ESP_LOGI(TAG, "Button: %s", button_state ? "PRESSED" : "RELEASED");
                 last_button_state = button_state;
@@ -93,7 +93,7 @@ void app_main(void) {
         
         // Read all pins at once (port-level read)
         uint8_t port_value;
-        if (TCA9554_read_port(gpio_expander, &port_value) == ESP_OK) {
+        if (tca9554_read_port(gpio_expander, &port_value) == ESP_OK) {
             ESP_LOGI(TAG, "Port value: 0x%02X", port_value);
         }
         
@@ -102,6 +102,6 @@ void app_main(void) {
     }
     
     // Cleanup (never reached in this example)
-    TCA9554_destroy(gpio_expander);
+    tca9554_destroy(gpio_expander);
     i2c_driver_delete(I2C_NUM_0);
 }
