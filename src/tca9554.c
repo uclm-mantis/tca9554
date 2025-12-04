@@ -1,4 +1,5 @@
 #include "tca9554.h"
+#include "freertos/FreeRTOS.h"
 #include <stdlib.h>
 #include <string.h>
 #include "esp_log.h"
