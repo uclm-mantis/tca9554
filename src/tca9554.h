@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "driver/i2c.h"
+#include "driver/i2c_master.h"
 #include "esp_err.h"
 
 #ifdef __cplusplus
@@ -71,11 +71,11 @@ typedef struct TCA9554_t TCA9554_t;
  * 
  * By default, all pins are configured as inputs (power-on reset state).
  * 
- * @param i2c_port I2C port number (e.g., I2C_NUM_0, I2C_NUM_1)
+ * @param bus I2C master bus (see i2c_new_master_bus)
  * @param dev_addr I2C device address (0x20-0x27, based on A0, A1, A2 pins)
  * @return TCA9554_t* Pointer to device instance, or NULL on failure
  */
-TCA9554_t* tca9554_create(i2c_port_t i2c_port, uint8_t dev_addr);
+TCA9554_t* tca9554_create(i2c_master_bus_handle_t bus, uint8_t dev_addr);
 
 /**
  * @brief Destroys a TCA9554 device instance and frees resources.

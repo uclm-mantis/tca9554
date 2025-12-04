@@ -11,7 +11,8 @@ static const char *TAG = "TCA9554";
  */
 
 struct TCA9554_t {
-    i2c_port_t i2c_port;
+    i2c_master_bus_handle_t bus;
+    i2c_master_dev_handle_t dev;
     uint8_t dev_addr;
     uint8_t value;
 };
@@ -24,48 +25,45 @@ struct TCA9554_t {
 /**
  * @brief Reads a single register from the TCA9554 via I2C
  */
-static esp_err_t tca9554_read_reg(TCA9554_t* dev, uint8_t reg, uint8_t* value) {
+static esp_err_t tca9554_read_reg(TCA9554_t* dev, uint8_t reg, uint8_t* value)
+{
     if (!dev || !value) return ESP_ERR_INVALID_ARG;
-    
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (dev->dev_addr << 1) | I2C_MASTER_WRITE, true);
-    i2c_master_write_byte(cmd, reg, true);
-    i2c_master_start(cmd);  // Repeated start
-    i2c_master_write_byte(cmd, (dev->dev_addr << 1) | I2C_MASTER_READ, true);
-    i2c_master_read_byte(cmd, value, I2C_MASTER_NACK);
-    i2c_master_stop(cmd);
-    
-    esp_err_t ret = i2c_master_cmd_begin(dev->i2c_port, cmd, pdMS_TO_TICKS(1000));
-    i2c_cmd_link_delete(cmd);
-    
+
+    // El TCA9554 usa write(reg) + repeated-start + read(1 byte)
+    uint8_t reg_addr = reg;
+    esp_err_t ret = i2c_master_transmit_receive(
+        dev->dev,              // i2c_master_dev_handle_t
+        &reg_addr, 1,          // write buffer: dirección de registro
+        value,     1,          // read buffer: 1 byte
+        pdMS_TO_TICKS(1000)    // timeout
+    );
+
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to read register 0x%02X: %s", reg, esp_err_to_name(ret));
     }
-    
+
     return ret;
 }
 
 /**
  * @brief Writes a single register to the TCA9554 via I2C
  */
-static esp_err_t tca9554_write_reg(TCA9554_t* dev, uint8_t reg, uint8_t value) {
+static esp_err_t tca9554_write_reg(TCA9554_t* dev, uint8_t reg, uint8_t value)
+{
     if (!dev) return ESP_ERR_INVALID_ARG;
-    
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (dev->dev_addr << 1) | I2C_MASTER_WRITE, true);
-    i2c_master_write_byte(cmd, reg, true);
-    i2c_master_write_byte(cmd, value, true);
-    i2c_master_stop(cmd);
-    
-    esp_err_t ret = i2c_master_cmd_begin(dev->i2c_port, cmd, pdMS_TO_TICKS(1000));
-    i2c_cmd_link_delete(cmd);
-    
+
+    uint8_t buf[2] = { reg, value };
+
+    esp_err_t ret = i2c_master_transmit(
+        dev->dev,            // i2c_master_dev_handle_t
+        buf, sizeof(buf),    // write: reg + value
+        pdMS_TO_TICKS(1000)  // timeout
+    );
+
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to write register 0x%02X: %s", reg, esp_err_to_name(ret));
     }
-    
+
     return ret;
 }
 
@@ -73,38 +71,63 @@ static esp_err_t tca9554_write_reg(TCA9554_t* dev, uint8_t reg, uint8_t value) {
  *  Public API Functions
  * =========================
  */
-
-TCA9554_t* tca9554_create(i2c_port_t i2c_port, uint8_t dev_addr) {
+TCA9554_t* tca9554_create(i2c_master_bus_handle_t bus, uint8_t dev_addr)
+{
     if (dev_addr < 0x20 || dev_addr > 0x27) {
-        ESP_LOGE(TAG, "Invalid device address 0x%02X (must be 0x20-0x27)", dev_addr);
+        ESP_LOGE(TAG, "Invalid device address 0x%02X (must be 0x20–0x27)", dev_addr);
         return NULL;
     }
-    
+
+    // Reservar estructura
     TCA9554_t* dev = (TCA9554_t*)calloc(1, sizeof(TCA9554_t));
     if (!dev) {
         ESP_LOGE(TAG, "Failed to allocate TCA9554 instance");
         return NULL;
     }
-    
-    dev->i2c_port = i2c_port;
+
+    dev->bus = bus;
     dev->dev_addr = dev_addr;
     dev->value = 0x00;
-    
-    // Verify device is accessible by reading the input register
-    uint8_t test_val;
-    esp_err_t ret = tca9554_read_reg(dev, TCA9554_REG_INPUT, &test_val);
+
+    // Configuración del dispositivo TCA9554 para la nueva API
+    i2c_device_config_t dev_cfg = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = dev_addr,
+        .scl_speed_hz = 400000,
+    };
+
+    // Crear handle del dispositivo
+    esp_err_t ret = i2c_master_bus_add_device(bus, &dev_cfg, &dev->dev);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to communicate with TCA9554 at address 0x%02X", dev_addr);
+        ESP_LOGE(TAG, "Failed to add TCA9554 device 0x%02X: %s",
+                 dev_addr, esp_err_to_name(ret));
         free(dev);
         return NULL;
     }
-    
-    ESP_LOGI(TAG, "TCA9554 initialized at address 0x%02X", dev_addr);
+
+    // Verificar comunicación leyendo el registro INPUT (0x00)
+    uint8_t test_val = 0;
+    ret = tca9554_read_reg(dev, TCA9554_REG_INPUT, &test_val);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to communicate with TCA9554 at address 0x%02X", dev_addr);
+        // Importante: eliminar dispositivo del bus antes de liberar
+        i2c_master_bus_rm_device(dev->dev);
+        free(dev);
+        return NULL;
+    }
+
+    ESP_LOGI(TAG, "TCA9554 initialized at I2C address 0x%02X", dev_addr);
     return dev;
 }
 
+
 void tca9554_destroy(TCA9554_t* dev) {
     if (!dev) return;
+    if (dev->dev) {
+        i2c_master_bus_rm_device(dev->dev);
+        dev->dev = NULL;
+    }
+    dev->bus = NULL;
     free(dev);
 }
 
